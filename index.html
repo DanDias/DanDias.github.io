@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://unpkg.com/jquery.terminal/js/jquery.terminal.min.js"></script>
+<script src="https://unpkg.com/js-polyfills/keyboard.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/jcubic/static/js/wcwidth.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/insane@2/insane.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/jquery.terminal/css/jquery.terminal.min.css"/>
+</head>
+<body>
+    <script>
+        const greeting = fetch('./data/greetings.md').then((response) => {
+            if (response.status >= 400) {
+                console.error(`Error loading data`)
+            }
+            return response.text()
+        })
+        term = $('body').terminal(function(cmd) {
+            cmd = $.terminal.parse_command(cmd);
+            if (cmd.name === 'help') {
+                this.echo(`You sure do need help...`)
+            }
+            if (cmd.name === 'sudo') {
+                this.echo(`Umm, no.`)
+            }
+        }, {
+            greetings: function (echo) {
+                greeting.then((function (greets) {
+                    echo(greets);
+                }))
+                return "";
+            },
+            onInit() {
+                term = this
+                fetch('./data/frontpage.md').then((fp) => {
+                    fp.text().then(function(text) {
+                        term.echo(marked.parse(text), {
+                            raw: true
+                        })
+                    })
+                })
+            },
+
+        })
+    </script>
+</body>
+</html>
